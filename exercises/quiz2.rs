@@ -38,13 +38,7 @@ mod my_module {
             let element = match command {
                 Command::Uppercase => string.to_uppercase(),
                 Command::Trim => string.trim().to_string(),
-                Command::Append(count) => {
-                    let mut s = string.clone();
-                    for _ in 0..*count {
-                        s = format!("{}bar", &s);
-                    }
-                    s
-                }
+                Command::Append(count) => string.to_string() + &"bar".repeat(*count),
             };
             output.push(element);
         }
