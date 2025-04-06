@@ -2,7 +2,6 @@
     single linked list merge
     This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -95,15 +94,28 @@ impl<T: std::cmp::PartialOrd> LinkedList<T> {
                         curr_a = Some(node_a_ptr);
                     }
                 }
+                // 匹配到 `None` 表示其中一个链表已处理完，此时直接将另一个链表的剩余部分添加到新链表中即可
                 (Some(mut node_a_ptr), None) => {
-                    new_list.push_back_node(node_a_ptr);
-                    curr_a = unsafe { node_a_ptr.as_mut().next.take() };
-                    curr_b = None;
+                    if let Some(mut new_list_end) = new_list.end {
+                        unsafe {
+                            new_list_end.as_mut().next = Some(node_a_ptr);
+                        }
+                    } else {
+                        new_list.start = Some(node_a_ptr);
+                    }
+                    new_list.end = list_a.end.take();
+                    break;
                 }
                 (None, Some(mut node_b_ptr)) => {
-                    new_list.push_back_node(node_b_ptr);
-                    curr_b = unsafe { node_b_ptr.as_mut().next.take() };
-                    curr_a = None;
+                    if let Some(mut new_list_end) = new_list.end {
+                        unsafe {
+                            new_list_end.as_mut().next = Some(node_b_ptr);
+                        }
+                    } else {
+                        new_list.start = Some(node_b_ptr);
+                    }
+                    new_list.end = list_b.end.take();
+                    break;
                 }
                 // 双方都无节点，结束
                 (None, None) => break,
