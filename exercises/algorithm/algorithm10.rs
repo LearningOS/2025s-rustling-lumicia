@@ -1,35 +1,57 @@
 /*
-	graph
-	This problem requires you to implement a basic graph functio
+    graph
+    This problem requires you to implement a basic graph function
 */
-// I AM NOT DONE
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
+
 #[derive(Debug, Clone)]
 pub struct NodeNotInGraph;
+
 impl fmt::Display for NodeNotInGraph {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "accessing a node that is not in the graph")
     }
 }
+
 pub struct UndirectedGraph {
     adjacency_table: HashMap<String, Vec<(String, i32)>>,
 }
+
 impl Graph for UndirectedGraph {
     fn new() -> UndirectedGraph {
         UndirectedGraph {
             adjacency_table: HashMap::new(),
         }
     }
+
     fn adjacency_table_mutable(&mut self) -> &mut HashMap<String, Vec<(String, i32)>> {
         &mut self.adjacency_table
     }
+
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>> {
         &self.adjacency_table
     }
+
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
-        //TODO
+        let (src, dest, weight) = edge;
+        let src_node = src.to_string();
+        let dest_node = dest.to_string();
+
+        if let Some(neighbors) = self.adjacency_table_mutable().get_mut(&src_node) {
+            neighbors.push((dest_node.clone(), weight));
+        } else {
+            self.adjacency_table_mutable()
+                .insert(src_node.clone(), vec![(dest_node.clone(), weight)]);
+        }
+
+        if let Some(neighbors) = self.adjacency_table_mutable().get_mut(&dest_node) {
+            neighbors.push((src_node.clone(), weight));
+        } else {
+            self.adjacency_table_mutable()
+                .insert(dest_node.clone(), vec![(src_node.clone(), weight)]);
+        }
     }
 }
 pub trait Graph {
@@ -37,11 +59,30 @@ pub trait Graph {
     fn adjacency_table_mutable(&mut self) -> &mut HashMap<String, Vec<(String, i32)>>;
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>>;
     fn add_node(&mut self, node: &str) -> bool {
-        //TODO
-		true
+        if self.contains(node) {
+            return false;
+        }
+        self.adjacency_table_mutable()
+            .insert(node.to_string(), vec![]);
+
+        true
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
-        //TODO
+        let (src, dest, weight) = edge;
+        if !self.contains(src) {
+            self.add_node(src);
+        }
+        if !self.contains(dest) {
+            self.add_node(dest);
+        }
+        self.adjacency_table_mutable()
+            .get_mut(src)
+            .unwrap()
+            .push((dest.to_string(), weight));
+        self.adjacency_table_mutable()
+            .get_mut(dest)
+            .unwrap()
+            .push((src.to_string(), weight));
     }
     fn contains(&self, node: &str) -> bool {
         self.adjacency_table().get(node).is_some()
